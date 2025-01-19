@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Analysis</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+        /* Include your styles as before */
+    </style>
+</head>
+<body>
+    <h1>Technical Analysis</h1>
+
+    <form id="technical-analysis-form">
+        <button type="submit" class="btn btn-primary">Submit for Technical Analysis</button>
+    </form>
+
+    <div id="response-container"></div>
+
+    <script>
+        $(document).ready(function () {
+            // Get companyCode from the page (you'll need to pass this dynamically)
+            var companyCode = "{{ company_code }}";
+
+            // AJAX form submission for Technical Analysis
+            $('#technical-analysis-form').submit(function (event) {
+                event.preventDefault();
+                $.post('/technical-analysis', {companyCode: companyCode}, function (response) {
+                    if (response.error) {
+                        $('#response-container').html('<p>Error: ' + response.error + '</p>');
+                    } else {
+                        var text = "One day: " + formatSignal(response.predicted_signal_1D) + " - ";
+                        text = text + "One week: " + formatSignal(response.predicted_signal_1W) + " - ";
+                        text = text + "One month: " + formatSignal(response.predicted_signal_1M);
+                        $('#response-container').html('<p>' + text + '</p>');
+                    }
+                }).fail(function() {
+                    $('#response-container').html('<p>There was an error with the request.</p>');
+                });
+            });
+        });
+
+        // Format signal for display
+        function formatSignal(signal) {
+            if (signal === 'BUY') {
+                return '<span style="color: green;">' + signal + '</span>';
+            } else if (signal === 'SELL') {
+                return '<span style="color: red;">' + signal + '</span>';
+            } else if (signal === 'HOLD') {
+                return '<span style="color: orange;">' + signal + '</span>';
+            }
+            return signal;
+        }
+    </script>
+</body>
+</html>

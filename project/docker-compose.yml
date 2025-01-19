@@ -1,0 +1,25 @@
+version: '3'
+services:
+  main-app:
+    image: dians4.azurecr.io/my-python-app:latest
+    ports:
+      - "5000:5000"
+    environment:
+      - TECHNICAL_ANALYSIS_MICROSERVICE_URL=http://technical-analysis-microservice:5001
+      - FUNDAMENTAL_ANALYSIS_MICROSERVICE_URL=http://fundamental-analysis-microservice:5002
+      - LSTM_MICROSERVICE_URL=http://lstm-microservice:5003
+
+  technical-analysis-microservice:
+    image: dians4.azurecr.io/technical-analysis-microservice:latest
+    ports:
+      - "5001:5001"
+
+  fundamental-analysis-microservice:
+    image: dians4.azurecr.io/fundamental-analysis-service-image:latest
+    ports:
+      - "5002:5002"
+
+  lstm-microservice:
+    image: dians4.azurecr.io/lstm-image:latest
+    ports:
+      - "5003:5003"

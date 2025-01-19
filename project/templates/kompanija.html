@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historical Data - {{ company_code }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-image: url('https://flextrade.com/wp-content/uploads/2019/09/Fotolia_257957753_Subscription_Monthly_M.jpg');
+            background-size: cover; /* Ensures the image covers the entire page */
+            background-position: center; /* Centers the image */
+            background-repeat: no-repeat; /* Ensures the image does not repeat */
+        }
+
+        .table-custom {
+            background-color: rgba(224, 247, 250, 0.4); /* Semi-transparent light blue color */
+            color: #333; /* Darker text color for contrast */
+        }
+
+        th, td {
+            font-weight: bold; /* Make text bold */
+            text-align: center; /* Центрирање на текстот хоризонтално */
+            vertical-align: middle;
+        }
+
+        h1 {
+            color: white; /* White color for the h1 text */
+            text-align: center;
+        }
+
+        #response-container p {
+            color: white;
+        }
+
+        button[type="submit"] {
+            background-color: silver; /* Silver background */
+            color: black; /* Black text */
+            font-weight: bold; /* Bold text */
+            border: none; /* Optional: Remove border */
+            padding: 10px 20px; /* Add some padding for better appearance */
+            border-radius: 5px; /* Optional: Rounded corners */
+            cursor: pointer; /* Change cursor to pointer for better UX */
+            transition: background-color 0.3s ease; /* Smooth hover effect */
+        }
+
+        button[type="submit"]:hover {
+            background-color: #c0c0c0; /* Slightly darker silver on hover */
+        }
+
+        .pagination-button.active {
+            background-color: #007bff; /* Blue color for active page */
+            color: white;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        function paginateData(page) {
+            // Get all rows
+            let rows = document.querySelectorAll('.data-row');
+            let rowsPerPage = 10; // Number of rows per page
+            let start = (page - 1) * rowsPerPage;
+            let end = page * rowsPerPage;
+
+            // Hide all rows
+            rows.forEach(row => row.style.display = 'none');
+
+            // Show only the rows for the current page
+            for (let i = start; i < end && i < rows.length; i++) {
+                rows[i].style.display = '';
+            }
+
+            // Update active page
+            document.querySelectorAll('.pagination-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            document.getElementById('page-' + page).classList.add('active');
+        }
+
+        window.onload = function () {
+            paginateData(1); // Initialize with page 1
+        };
+
+        // Formatiranje na signalite
+        function formatSignal(signal) {
+            if (signal === 'BUY') {
+                return '<span style="color: green; font-weight: bold;">' + signal + '</span>';
+            } else if (signal === 'SELL') {
+                return '<span style="color: red; font-weight: bold;">' + signal + '</span>';
+            } else if (signal === 'HOLD') {
+                return '<span style="color: orange; font-weight: bold;">' + signal + '</span>';
+            } else {
+                return '<span style="font-weight: bold;">' + signal + '</span>';
+            }
+        }
+
+        //Formatiranje text
+        function formatText(text) {
+            if (text.includes('Buy stocks')) {
+                return '<span class="buy-text" style="color: green; font-weight: bold;">' + text + '</span>';
+            } else if (text.includes('Sell stocks')) {
+                return '<span class="sell-text" style="color: red; font-weight: bold;">' + text + '</span>';
+            } else if (text.includes('No relevant news found') || text.includes('No news available')) {
+                return '<span class="no-news-text" style="color: lightblue; font-weight: bold;">' + text + '</span>';
+            } else if (text.includes('HOLD')) {
+                return '<span class="neutral-text" style="color: orange; font-weight: bold;">' + text + '</span>';
+            } else {
+                return '<span style="font-weight: bold; color: black;">' + text + '</span>';
+            }
+        }
+    </script>
+</head>
+<body>
+
+<!-- Display Selected Company -->
+<div class="container mt-5">
+    <h1>Историски податоци за {{ company_code }}</h1>
+
+    <!-- Pagination Controls -->
+    <div class="d-flex justify-content-center mt-4">
+        <button id="page-1" class="btn btn-outline-secondary pagination-button" onclick="paginateData(1)">1</button>
+        <button id="page-2" class="btn btn-outline-secondary pagination-button" onclick="paginateData(2)">2</button>
+        <button id="page-3" class="btn btn-outline-secondary pagination-button" onclick="paginateData(3)">3</button>
+        <button id="page-4" class="btn btn-outline-secondary pagination-button" onclick="paginateData(4)">4</button>
+    </div>
+
+    <!-- Table to Display Historical Data -->
+    <table class="table table-striped table-custom mt-3">
+        <thead>
+        <tr>
+            <th scope="col">Датум на запишување</th>
+            <th scope="col">Последна цена</th>
+            <th scope="col">Највисока цена</th>
+            <th scope="col">Најниска цена</th>
+            <th scope="col">Просечна цена</th>
+            <th scope="col">Промена во проценти</th>
+            <th scope="col">Обем</th>
+            <th scope="col">Најдобар промет</th>
+            <th scope="col">Вкупен промет</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in historical_data %}
+            <tr class="data-row">
+                <td>{{ row['record_date'] }}</td>
+                <td>{{ row['last_price'] }}</td>
+                <td>{{ row['high_price'] }}</td>
+                <td>{{ row['low_price'] }}</td>
+                <td>{{ row['avg_price'] }}</td>
+                <td>{{ row['percent_change']|int }}</td>
+                <td>{{ row['volume'] }}</td>
+                <td>{{ row['turnover_best'] }}</td>
+                <td>{{ row['total_turnover'] }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="mt-5 text-center">
+        <form id="technical-analysis-form" class="d-inline">
+            <button type="submit" class="btn btn-primary">Техничка анализа</button>
+        </form>
+
+        <form id="fundamental-analysis-form" class="d-inline mx-3">
+            <button type="submit" class="btn btn-primary">Фундаментална анализа</button>
+        </form>
+
+        <form id="lstm-form" class="d-inline">
+            <button type="submit" class="btn btn-primary">LSTM</button>
+        </form>
+    </div>
+
+    <div id="response-container" class="mt-4 text-center"></div>
+
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Get companyCode from the page
+        var companyCode = "{{ company_code }}";
+
+  $('#technical-analysis-form').submit(function (event) {
+    event.preventDefault();
+    var companyCode = "{{ company_code }}"; // Ensure this is passed correctly
+    $.post('/technical-analysis', { companyCode: companyCode }, function (response) {
+        if (response.error) {
+            $('#response-container').html('<p>Error: ' + response.error + '</p>');
+        } else {
+            // Properly format the received signals
+            var text = "One day: " + formatSignal(response.predicted_signal_1D) + " - ";
+            text += "One week: " + formatSignal(response.predicted_signal_1W) + " - ";
+            text += "One month: " + formatSignal(response.predicted_signal_1M);
+            $('#response-container').html('<p>' + text + '</p>');
+        }
+    }).fail(function () {
+        $('#response-container').html('<p>There was an error with the request.</p>');
+    });
+  });
+
+
+        // AJAX form submission for Fundamental Analysis
+        $('#fundamental-analysis-form').submit(function (event) {
+            event.preventDefault();
+            $.post('/fundamental-analysis', {companyCode: companyCode}, function (response) {
+                var formattedResponse = formatText(response);
+                $('#response-container').html('<p>' + formattedResponse + '</p>');
+            });
+        });
+
+        // AJAX form submission for LSTM
+        $('#lstm-form').submit(function (event) {
+            event.preventDefault();
+            $.post('/lstm', {companyCode: companyCode}, function (response) {
+                $('#response-container').html('<p>' + response.predicted_price + '</p>');
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,9 @@
+flask
+pandas
+requests
+matplotlib
+scikit-learn
+tensorflow
+textblob
+ta
+beautifulsoup4
